@@ -402,14 +402,14 @@ uint32_t chunkType;
 uint32_t chunkCRC;
 char *chunkData;
 
-  chunkLength = LONG_ENDINESS(*(uint32_t *)(input + *inputOffset));
-  chunkType = LONG_ENDINESS(*(uint32_t *)((input + *inputOffset + PNG_LENGTH_FIELD_SIZE)));
+  chunkLength = LONG_BITSWAP(*(uint32_t *)(input + *inputOffset));
+  chunkType = LONG_BITSWAP(*(uint32_t *)((input + *inputOffset + PNG_LENGTH_FIELD_SIZE)));
   chunkData = input + *inputOffset + PNG_CHUNK_HEADER_SIZE;
-  chunkCRC = LONG_ENDINESS(*(uint32_t *)((input + *inputOffset + PNG_CHUNK_HEADER_SIZE + chunkLength)));
+  chunkCRC = LONG_BITSWAP(*(uint32_t *)((input + *inputOffset + PNG_CHUNK_HEADER_SIZE + chunkLength)));
 
   ihdr = (Chunk_IHDR *)(chunkData);
 
-  printf("[*] Dimensions: %dx%d\n", LONG_ENDINESS(ihdr->width), LONG_ENDINESS(ihdr->height));
+  printf("[*] Dimensions: %dx%d\n", LONG_BITSWAP(ihdr->width), LONG_BITSWAP(ihdr->height));
   printf("[*] Bit Depth: %d\n", ihdr->bitDepth);
   printf("[*] Color Type: %d\n", ihdr->colorType);
   printf("[*] Compression: %d\n", ihdr->compressionMethod);
@@ -432,38 +432,38 @@ char *chunkData;
     exit(1);
   }
 
-  this->width = LONG_ENDINESS(ihdr->width);
-  this->height = LONG_ENDINESS(ihdr->height);
+  this->width = LONG_BITSWAP(ihdr->width);
+  this->height = LONG_BITSWAP(ihdr->height);
 
   switch(ihdr->colorType) {
     case 0:
       printf("[*] IHDR Color Type: Grayscale\n");
-      this->scanlineLength = LONG_ENDINESS(ihdr->width) + 1;
+      this->scanlineLength = LONG_BITSWAP(ihdr->width) + 1;
       this->bytesPerPixel = (1 * ihdr->bitDepth) / 8;
       break;
 
     case 2:
       printf("[*] IHDR Color Type: RGB\n");
-      this->scanlineLength = LONG_ENDINESS(ihdr->width) * 3 + 1;
+      this->scanlineLength = LONG_BITSWAP(ihdr->width) * 3 + 1;
       this->bytesPerPixel = (3 * ihdr->bitDepth) / 8;
       break;
 
     case 3:
       printf("[*] IHDR Color Type: Palette\n");
       printf("[!] Pallate not currently supported so results may be screwy!\n");
-      this->scanlineLength = LONG_ENDINESS(ihdr->width) + 1;
+      this->scanlineLength = LONG_BITSWAP(ihdr->width) + 1;
       this->bytesPerPixel = (1 * ihdr->bitDepth) / 8;
       break;
 
     case 4:
       printf("[*] IHDR Color Type: Grayscale + Alpha\n");
-      this->scanlineLength = LONG_ENDINESS(ihdr->width) * 2 + 1;
+      this->scanlineLength = LONG_BITSWAP(ihdr->width) * 2 + 1;
       this->bytesPerPixel = (2 * ihdr->bitDepth) / 8;
       break;
 
     case 6:
       printf("[*] IHDR Color Type: RGB + Alpha\n");
-      this->scanlineLength = LONG_ENDINESS(ihdr->width) * 4 + 1;
+      this->scanlineLength = LONG_BITSWAP(ihdr->width) * 4 + 1;
       this->bytesPerPixel = (4 * ihdr->bitDepth) / 8;
       break;
   }
@@ -509,10 +509,10 @@ uint32_t chunkLength;
 uint32_t chunkType;
 uint32_t chunkCRC;
 
-  chunkLength = LONG_ENDINESS(*(uint32_t *)(input + *inputOffset));
-  chunkType = LONG_ENDINESS(*(uint32_t *)((input + *inputOffset + PNG_LENGTH_FIELD_SIZE)));
+  chunkLength = LONG_BITSWAP(*(uint32_t *)(input + *inputOffset));
+  chunkType = LONG_BITSWAP(*(uint32_t *)((input + *inputOffset + PNG_LENGTH_FIELD_SIZE)));
   chunkData = input + *inputOffset + PNG_CHUNK_HEADER_SIZE;
-  chunkCRC = LONG_ENDINESS(*(uint32_t *)((input + *inputOffset + PNG_CHUNK_HEADER_SIZE + chunkLength)));
+  chunkCRC = LONG_BITSWAP(*(uint32_t *)((input + *inputOffset + PNG_CHUNK_HEADER_SIZE + chunkLength)));
 
   // Now we need to handle all that IDAT stuff
   this->handleFilters();
@@ -528,7 +528,7 @@ uint32_t chunkCRC;
       printf("[*] Compressed Length: %d bytes\n", compressedLength);
       output = (char*)realloc(output, *outputOffset + compressedLength + PNG_CHUNK_HEADER_SIZE + PNG_CRC_FIELD_SIZE);
 
-      *(uint32_t *)(output + *outputOffset) = LONG_ENDINESS(compressedLength);
+      *(uint32_t *)(output + *outputOffset) = LONG_BITSWAP(compressedLength);
       *outputOffset += PNG_LENGTH_FIELD_SIZE;
 
       *(uint32_t *)(output + *outputOffset) = IDAT;
@@ -537,14 +537,14 @@ uint32_t chunkCRC;
       memcpy(output + *outputOffset, compressedData, compressedLength);
       *outputOffset += compressedLength;
 
-      *(uint32_t *)(output + *outputOffset) = LONG_ENDINESS(crc32(0, (unsigned char *)output + *outputOffset - compressedLength - PNG_LENGTH_FIELD_SIZE, compressedLength + PNG_LENGTH_FIELD_SIZE));
+      *(uint32_t *)(output + *outputOffset) = LONG_BITSWAP(crc32(0, (unsigned char *)output + *outputOffset - compressedLength - PNG_LENGTH_FIELD_SIZE, compressedLength + PNG_LENGTH_FIELD_SIZE));
       *outputOffset += PNG_CRC_FIELD_SIZE;
   });
 
   output = (char*)realloc(output, *outputOffset + chunkLength + PNG_CHUNK_HEADER_SIZE + PNG_CRC_FIELD_SIZE);
 
   // Copy the IEND chunk to our stego output
-  *(uint32_t *)(output + *outputOffset) = LONG_ENDINESS(chunkLength);
+  *(uint32_t *)(output + *outputOffset) = LONG_BITSWAP(chunkLength);
   *outputOffset += PNG_LENGTH_FIELD_SIZE;
 
   *(uint32_t *)(output + *outputOffset) = IEND;
@@ -553,7 +553,7 @@ uint32_t chunkCRC;
   memcpy(output + *outputOffset, chunkData, chunkLength);
   *outputOffset += chunkLength;
 
-  *(uint32_t *)(output + *outputOffset) = LONG_ENDINESS(crc32(0, (unsigned char *)output + *outputOffset - chunkLength - PNG_LENGTH_FIELD_SIZE, chunkLength + PNG_LENGTH_FIELD_SIZE));;
+  *(uint32_t *)(output + *outputOffset) = LONG_BITSWAP(crc32(0, (unsigned char *)output + *outputOffset - chunkLength - PNG_LENGTH_FIELD_SIZE, chunkLength + PNG_LENGTH_FIELD_SIZE));;
   *outputOffset += PNG_CRC_FIELD_SIZE;
 
   // Update the offsets
@@ -575,10 +575,10 @@ uint32_t chunkLength;
 uint32_t chunkType;
 uint32_t chunkCRC;
 
-  chunkLength = LONG_ENDINESS(*(uint32_t *)(input + *inputOffset));
-  chunkType = LONG_ENDINESS(*(uint32_t *)((input + *inputOffset + PNG_LENGTH_FIELD_SIZE)));
+  chunkLength = LONG_BITSWAP(*(uint32_t *)(input + *inputOffset));
+  chunkType = LONG_BITSWAP(*(uint32_t *)((input + *inputOffset + PNG_LENGTH_FIELD_SIZE)));
   chunkData = input + *inputOffset + PNG_CHUNK_HEADER_SIZE;
-  chunkCRC = LONG_ENDINESS(*(uint32_t *)((input + *inputOffset + PNG_CHUNK_HEADER_SIZE + chunkLength)));
+  chunkCRC = LONG_BITSWAP(*(uint32_t *)((input + *inputOffset + PNG_CHUNK_HEADER_SIZE + chunkLength)));
 
   // Decompress the data
   this->compression->decompress((unsigned char *)chunkData, chunkLength, (this->width * this->height * this->bytesPerPixel) + this->height, [this](char *decompressedData, int decompressedLength) {
@@ -609,10 +609,10 @@ uint32_t chunkLength;
 uint32_t chunkType;
 uint32_t chunkCRC;
 
-  chunkLength = LONG_ENDINESS(*(uint32_t *)(input + *inputOffset));
-  chunkType = LONG_ENDINESS(*(uint32_t *)((input + *inputOffset + PNG_LENGTH_FIELD_SIZE)));
+  chunkLength = LONG_BITSWAP(*(uint32_t *)(input + *inputOffset));
+  chunkType = LONG_BITSWAP(*(uint32_t *)((input + *inputOffset + PNG_LENGTH_FIELD_SIZE)));
   chunkData = input + *inputOffset + PNG_CHUNK_HEADER_SIZE;
-  chunkCRC = LONG_ENDINESS(*(uint32_t *)((input + *inputOffset + PNG_CHUNK_HEADER_SIZE + chunkLength)));
+  chunkCRC = LONG_BITSWAP(*(uint32_t *)((input + *inputOffset + PNG_CHUNK_HEADER_SIZE + chunkLength)));
 
   // If we are decoding, we return here
   if (this->mode == PNGStegoMode::DECODE) {
@@ -677,7 +677,7 @@ char* PNGStego::encode(char *data, int dataLen, int *outLength) {
 
     // Each chunk starts with a 4 byte length and 4 byte type
     // followed by the data (of length bytes) and a 4 byte CRC
-    pngChunkLength = LONG_ENDINESS(*(uint32_t *)(inBuffer + inBufferOffset));
+    pngChunkLength = LONG_BITSWAP(*(uint32_t *)(inBuffer + inBufferOffset));
     pngChunkType = *(uint32_t *)(inBuffer + inBufferOffset + PNG_LENGTH_FIELD_SIZE);
 
     switch(pngChunkType) {
@@ -746,7 +746,7 @@ char* PNGStego::decode() {
 
     // Each chunk starts with a 4 byte length and 4 byte type
     // followed by the data (of length bytes) and a 4 byte CRC
-    pngChunkLength = LONG_ENDINESS(*(uint32_t *)(inBuffer + inBufferOffset));
+    pngChunkLength = LONG_BITSWAP(*(uint32_t *)(inBuffer + inBufferOffset));
     pngChunkType = *(uint32_t *)(inBuffer + inBufferOffset + PNG_LENGTH_FIELD_SIZE);
 
     switch(pngChunkType) {
