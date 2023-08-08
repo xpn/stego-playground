@@ -1,0 +1,5 @@
+.vscode
+build
+CMakeFiles
+**/*.dSYM
+**/.DS_Store
