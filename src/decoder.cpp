@@ -41,7 +41,7 @@ void hexdump(const void* data, size_t size) {
 int main(int argc, char **argv) {
 
   printf("PNG Stego Decoder POC\n");
-  printf("  Created by @_xpn_ to support the blog post: https://blog.xpnsec.com/png-stego/\n\n");
+  printf("  Created by @_xpn_ to support the blog post: https://blog.xpnsec.com/png-steganography/\n\n");
 
   if (argc < 2) {
     printf("Usage: %s <png file>\n", argv[0]);
