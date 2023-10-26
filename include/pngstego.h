@@ -6,7 +6,7 @@
 #include "compression.h"
 #include "bititerator.h"
 
-#define LONG_ENDINESS(x) (((x) >> 24) | (((x) >> 8) & 0xff00) | (((x) << 8) & 0xff0000) | ((x) << 24))
+#define LONG_BITSWAP(x) (((x) >> 24) | (((x) >> 8) & 0xff00) | (((x) << 8) & 0xff0000) | ((x) << 24))
 
 #define PNG_SIGNATURE 0xa1a0a0d474e5089
 #define PNG_SIGNATURE_LENGTH 8

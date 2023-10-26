@@ -329,8 +329,12 @@ void PNGStego::handleFilters() {
       this->encodeDataIntoScanline((unsigned char *)this->uncompressedData + i + 1, this->scanlineLength - 1);
     } else {
       this->decodeDataFromScanline((unsigned char *)this->uncompressedData + i + 1, this->scanlineLength - 1);
-      return;
     }
+  }
+
+  // DERP: Thanks to @au5_mate for spotting that this was in the wrong place...
+  if (this->mode == PNGStegoMode::DECODE) {
+    return;
   }
 
   char *origBytes = (char*)malloc(this->uncompressedDataLength);
